@@ -95,19 +95,17 @@ namespace Telegram.Bot.Extensions.CommandParser
 
         private Variable CreateVariable(Match match)
         {
-            if (!match.Groups["variable"].Success) throw new InvalidOperationException();
+            if (!match.Groups["variable"].Success)
+                throw new InvalidOperationException("Command format is invalid");
 
-            IVariableType variableType;
+            var variableType = Options.DefaultVariableType;
 
             var variableTypeName = match.Groups["type"].Success
                 ? match.Groups["type"].Value
                 : null;
 
-            if (string.IsNullOrWhiteSpace(variableTypeName))
-            {
-                variableType = Options.DefaultVariableType;
-            }
-            else if (!Options.VariableTypes.TryGetValue(variableTypeName, out variableType))
+            if (string.IsNullOrWhiteSpace(variableTypeName) &&
+                !Options.VariableTypes.TryGetValue(variableTypeName!, out variableType))
             {
                 throw new InvalidOperationException($"Invalid variable type '{variableTypeName}'");
             }

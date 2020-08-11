@@ -140,7 +140,7 @@ namespace Telegram.Bot.Extensions.CommandParser
             }
 
             var options = new CommandParserOptions(
-                _commandPattern,
+                _commandPattern!,
                 variableTypes,
                 argumentParsers,
                 _defaultVariableType,
