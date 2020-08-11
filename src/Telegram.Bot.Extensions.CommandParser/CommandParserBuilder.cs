@@ -67,7 +67,6 @@ namespace Telegram.Bot.Extensions.CommandParser
             return this;
         }
 
-
         public CommandParserBuilder UseVariableType(IVariableType variableType)
         {
             if (variableType is null) throw new ArgumentNullException(nameof(variableType));
@@ -81,30 +80,6 @@ namespace Telegram.Bot.Extensions.CommandParser
         {
             _variableStartChar = start;
             _variableEndChar = end;
-
-            return this;
-        }
-
-        public CommandParserBuilder UseDefault()
-        {
-            _variableTypes["string"] = new StringVariableType();
-            _argumentParsers[typeof(string)] = new StringParser();
-
-            _variableTypes["int"] = new IntVariableType();
-            _argumentParsers[typeof(int)] = new IntParser();
-
-            _variableTypes["long"] = new LongVariableType();
-            _argumentParsers[typeof(long)] = new LongParser();
-
-            _variableTypes["double"] = new DoubleVariableType();
-            _argumentParsers[typeof(double)] = new DoubleParser();
-
-            _variableTypes["bool"] = new BoolVariableType();
-            _argumentParsers[typeof(bool)] = new BoolParser();
-
-            _defaultVariableType = _variableTypes["string"];
-            _variableStartChar = "{{";
-            _variableEndChar = "}}";
 
             return this;
         }
@@ -175,5 +150,37 @@ namespace Telegram.Bot.Extensions.CommandParser
 
             return new CommandParser(options);
         }
+
+        public static CommandParserBuilder CreateDefaultBuilder() =>
+            new CommandParserBuilder()
+                .UseVariableType(new StringVariableType())
+                .UseVariableType(new IntVariableType())
+                .UseVariableType(new LongVariableType())
+                .UseVariableType(new DoubleVariableType())
+                .UseVariableType(new BoolVariableType())
+                .UseArgumentParser(new StringParser())
+                .UseArgumentParser(new IntParser())
+                .UseArgumentParser(new LongParser())
+                .UseArgumentParser(new DoubleParser())
+                .UseArgumentParser(new BoolParser())
+                .UseDefaultVariableType("string")
+                .UseVariableDelimiters("{{", "}}");
+
+        public static CommandParser CreateDefaultParser(string commandPattern) =>
+            new CommandParserBuilder()
+                .UseVariableType(new StringVariableType())
+                .UseVariableType(new IntVariableType())
+                .UseVariableType(new LongVariableType())
+                .UseVariableType(new DoubleVariableType())
+                .UseVariableType(new BoolVariableType())
+                .UseArgumentParser(new StringParser())
+                .UseArgumentParser(new IntParser())
+                .UseArgumentParser(new LongParser())
+                .UseArgumentParser(new DoubleParser())
+                .UseArgumentParser(new BoolParser())
+                .UseDefaultVariableType(new StringVariableType())
+                .UseVariableDelimiters("{{", "}}")
+                .UseCommandPattern(commandPattern)
+                .Build();
     }
 }
