@@ -9,7 +9,7 @@ variable type
 - Repeated parameter names are not allowed
 - There's no real command format validation, be careful
 - The parser is meant to be created once and be reused, so it's better to cache them
-
+- Parameters are surrounded by `{{` and `}}` sequences
 
 The parser has five built-in types: for int, long, double, bool and string types.
 
@@ -68,8 +68,6 @@ var parsers = new Dictionary<Type, IArgumentParser>
     { typeof(double), new DoubleParser() },
 };
 var defaultVariableType = new StringVariableType();
-var variableStartChar = "{{";
-var variableEndChar = "}}";
 var commandFormat = "!commandName {{argument1:bool}} {{argument2:long}} {{argument3}}";
 
 var defaultVariableType = new StringVariableType();
@@ -78,9 +76,7 @@ var commandParserOptions = new CommandParserOptions(
     commandFormat,
     variableTypes,
     parsers,
-    defaultVariableType,
-    variableStartChar,
-    variableEndChar
+    defaultVariableType
 )
 
 var commandParser = new CommandParser(commandParserOptions);
