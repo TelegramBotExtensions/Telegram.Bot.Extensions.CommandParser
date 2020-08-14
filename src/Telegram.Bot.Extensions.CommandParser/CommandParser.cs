@@ -6,27 +6,26 @@ namespace Telegram.Bot.Extensions.CommandParser
 {
     public class CommandParser
     {
-        private static readonly string CommandTokenPattern =
-            @"[{0}](?<variable>[a-zA-Z0-9_]+?)(:(?<type>[a-z]+?))?[{1}]";
+        private const string CommandTokenPattern =
+            @"\{\{(?<variable>[a-zA-Z0-9_]+?)(:(?<type>[a-z]+?))?\}\}";
 
-        private static readonly string VariableTokenPattern = @"(?<{0}>{1})";
+        private const string VariableTokenPattern = @"(?<{0}>{1})";
 
         private readonly Regex _regex;
 
         public CommandParser(CommandParserOptions options)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
-
-            var variableList = new List<Variable>();
             var matchCollection = Regex.Matches(
                 Options.CommandFormat,
-                string.Format(
-                    CommandTokenPattern,
-                    Options.VariableStartChar,
-                    Options.VariableEndChar
-                ),
-                RegexOptions.IgnoreCase);
+                CommandTokenPattern,
+                RegexOptions.IgnoreCase
+            );
 
+            if (matchCollection.Count == 0)
+                throw new InvalidOperationException("Command pattern is incorrect");
+
+            var variableList = new List<Variable>();
             foreach (Match match in matchCollection)
             {
                 var variable = CreateVariable(match);
@@ -104,7 +103,7 @@ namespace Telegram.Bot.Extensions.CommandParser
                 ? match.Groups["type"].Value
                 : null;
 
-            if (string.IsNullOrWhiteSpace(variableTypeName) &&
+            if (!string.IsNullOrEmpty(variableTypeName) &&
                 !Options.VariableTypes.TryGetValue(variableTypeName!, out variableType))
             {
                 throw new InvalidOperationException($"Invalid variable type '{variableTypeName}'");

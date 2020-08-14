@@ -13,8 +13,6 @@ namespace Telegram.Bot.Extensions.CommandParser
         private readonly Dictionary<string, IVariableType> _variableTypes =
             new Dictionary<string, IVariableType>();
 
-        private string? _variableStartChar;
-        private string? _variableEndChar;
         private string? _commandPattern;
         private IVariableType? _defaultVariableType;
 
@@ -76,14 +74,6 @@ namespace Telegram.Bot.Extensions.CommandParser
             return this;
         }
 
-        public CommandParserBuilder UseVariableDelimiters(string start, string end)
-        {
-            _variableStartChar = start;
-            _variableEndChar = end;
-
-            return this;
-        }
-
         public CommandParserBuilder UseCommandPattern(string commandPattern)
         {
             if (string.IsNullOrWhiteSpace(commandPattern))
@@ -99,12 +89,6 @@ namespace Telegram.Bot.Extensions.CommandParser
             if (string.IsNullOrWhiteSpace(_commandPattern))
                 throw new InvalidOperationException("Command pattern is not set");
 
-            if (string.IsNullOrWhiteSpace(_variableStartChar))
-                throw new InvalidOperationException("Start variable character is not set");
-
-            if (string.IsNullOrWhiteSpace(_variableStartChar))
-                throw new InvalidOperationException("End variable character is not set");
-
             if (_variableTypes.Count == 0)
                 throw new InvalidOperationException("Variable types is empty");
 
@@ -113,12 +97,6 @@ namespace Telegram.Bot.Extensions.CommandParser
 
             if (_defaultVariableType is null)
                 throw new InvalidOperationException("Default variable type is not set");
-
-            if (_variableStartChar is null)
-                throw new InvalidOperationException("Start char can't be null");
-
-            if (_variableEndChar is null)
-                throw new InvalidOperationException("End char can't be null");
 
             var variableTypes = new Dictionary<string, IVariableType>();
 
@@ -143,9 +121,7 @@ namespace Telegram.Bot.Extensions.CommandParser
                 _commandPattern!,
                 variableTypes,
                 argumentParsers,
-                _defaultVariableType,
-                _variableStartChar,
-                _variableEndChar
+                _defaultVariableType
             );
 
             return new CommandParser(options);
@@ -163,8 +139,7 @@ namespace Telegram.Bot.Extensions.CommandParser
                 .UseArgumentParser(new LongParser())
                 .UseArgumentParser(new DoubleParser())
                 .UseArgumentParser(new BoolParser())
-                .UseDefaultVariableType("string")
-                .UseVariableDelimiters("{{", "}}");
+                .UseDefaultVariableType("string");
 
         public static CommandParser CreateDefaultParser(string commandPattern) =>
             new CommandParserBuilder()
@@ -179,7 +154,6 @@ namespace Telegram.Bot.Extensions.CommandParser
                 .UseArgumentParser(new DoubleParser())
                 .UseArgumentParser(new BoolParser())
                 .UseDefaultVariableType(new StringVariableType())
-                .UseVariableDelimiters("{{", "}}")
                 .UseCommandPattern(commandPattern)
                 .Build();
     }
