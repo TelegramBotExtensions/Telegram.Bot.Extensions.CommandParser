@@ -2,19 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Telegram.Bot.Extensions.CommandParser.Tests
 {
     public class ParserTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public ParserTests(ITestOutputHelper testOutputHelper)
-        {
-            _testOutputHelper = testOutputHelper;
-        }
-
         [Fact]
         public void Should_Parse_Command()
         {
@@ -51,8 +43,6 @@ namespace Telegram.Bot.Extensions.CommandParser.Tests
             );
 
             var command = $"/test {parameterValue}";
-            _testOutputHelper.WriteLine(command);
-            _testOutputHelper.WriteLine(commandParser.Options.CommandFormat);
 
             var result = commandParser.ParseCommand(command);
             Assert.True(result.Successful);
@@ -63,13 +53,43 @@ namespace Telegram.Bot.Extensions.CommandParser.Tests
                 .GetMethod("Get", BindingFlags.Instance | BindingFlags.Public)?
                 .MakeGenericMethod(runtimeType);
 
-            var parsedValue = methodInfo?.Invoke(result.Variables, new [] {"arg1", null});
+            var parsedValue = methodInfo?.Invoke(result.Variables, new object[] {"arg1", null});
 
             Assert.NotNull(parsedValue);
             Assert.IsType(runtimeType, parsedValue);
-
-            _testOutputHelper.WriteLine(arg1);
             Assert.Equal(parameterValue, arg1);
+        }
+
+        [Fact]
+        public void Should_Throw_On_When_Parsed_With_Invalid_Type()
+        {
+            var commandParser = CommandParserBuilder.CreateDefaultParser("/test {{arg1:int}}");
+            var command = "/test 1123";
+            var result = commandParser.ParseCommand(command);
+
+            Assert.True(result.Successful);
+            Assert.Throws<InvalidOperationException>(() => result.Variables.Get<bool>("arg1"));
+        }
+
+        [Fact]
+        public void Should_Throw_On_When_Parsed_Missing_Variable()
+        {
+            var commandParser = CommandParserBuilder.CreateDefaultParser("/test {{arg1:int}}");
+            var command = "/test 1123";
+            var result = commandParser.ParseCommand(command);
+
+            Assert.True(result.Successful);
+            Assert.Throws<KeyNotFoundException>(() => result.Variables.Get<bool>("arg2"));
+        }
+
+        [Fact]
+        public void Should_Throw_On_Invalid_Command_Pattern()
+        {
+            var exception = Assert.Throws<InvalidOperationException>(
+                () => CommandParserBuilder.CreateDefaultParser("/test {{arg1:invalid}}")
+            );
+
+            Assert.Equal("Invalid variable type 'invalid'", exception.Message);
         }
     }
 }
