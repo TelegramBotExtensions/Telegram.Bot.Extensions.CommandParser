@@ -22,9 +22,6 @@ namespace Telegram.Bot.Extensions.CommandParser
                 RegexOptions.IgnoreCase
             );
 
-            if (matchCollection.Count == 0)
-                throw new InvalidOperationException("Command pattern is incorrect");
-
             var variableList = new List<Variable>();
             foreach (Match match in matchCollection)
             {
