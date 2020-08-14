@@ -20,9 +20,9 @@ namespace Telegram.Bot.Extensions.CommandParser
                 throw new ArgumentNullException(nameof(commandFormat));
 
             CommandFormat = commandFormat;
-            VariableTypes = variableTypes;
-            Parsers = parsers;
-            DefaultVariableType = defaultVariableType;
+            VariableTypes = variableTypes ?? throw new ArgumentNullException(nameof(variableTypes));
+            Parsers = parsers ?? throw new ArgumentNullException(nameof(parsers));
+            DefaultVariableType = defaultVariableType ?? throw new ArgumentNullException(nameof(defaultVariableType));
         }
     }
 }
